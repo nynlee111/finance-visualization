@@ -2,13 +2,41 @@
 
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { XMLParser } from 'fast-xml-parser';
 
-const corpXmlPath = 'C:\\Users\\123\\Downloads\\corp.xml';
-const outputPath = path.join(process.cwd(), 'public', 'data', 'corps.json');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const root = process.cwd();
+const outputPath = path.join(root, 'public', 'data', 'corps.json');
 
-if (!fs.existsSync(corpXmlPath)) {
-  console.error(`corp.xml 파일을 찾을 수 없습니다: ${corpXmlPath}`);
+function hasValidCorpsJson() {
+  try {
+    if (!fs.existsSync(outputPath)) return false;
+    const raw = fs.readFileSync(outputPath, 'utf8');
+    const data = JSON.parse(raw);
+    return Array.isArray(data) && data.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+if (hasValidCorpsJson()) {
+  console.log(`기존 corps.json 사용 (건너뜀): ${outputPath}`);
+  process.exit(0);
+}
+
+const candidates = [
+  process.env.CORP_XML_PATH,
+  path.join(root, 'data', 'corp.xml'),
+  'C:\\Users\\123\\Downloads\\corp.xml',
+].filter(Boolean);
+
+const corpXmlPath = candidates.find((p) => fs.existsSync(p));
+
+if (!corpXmlPath) {
+  console.error(
+    'corp.xml을 찾을 수 없고 public/data/corps.json도 없습니다. CORP_XML_PATH를 설정하거나 data/corp.xml을 두세요.'
+  );
   process.exit(1);
 }
 
@@ -44,5 +72,5 @@ if (!fs.existsSync(outputDir)) {
 
 fs.writeFileSync(outputPath, JSON.stringify(corporations, null, 2), 'utf8');
 
-console.log(`✅ 변환 완료: ${corporations.length}개 기업 데이터`);
-console.log(`📁 저장 위치: ${outputPath}`);
+console.log(`변환 완료: ${corporations.length}개 기업 데이터`);
+console.log(`저장 위치: ${outputPath}`);

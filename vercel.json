@@ -1,22 +1,7 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/index.html",
-      "destination": "/",
-      "permanent": true
-    }
-  ],
   "headers": [
     {
-      "source": "/api/:path*",
+      "source": "/api/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -25,7 +10,7 @@
       ]
     },
     {
-      "source": "/public/data/:path*",
+      "source": "/data/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -33,9 +18,5 @@
         }
       ]
     }
-  ],
-  "env": [
-    "OPENDART_API_KEY",
-    "GEMINI_API_KEY"
   ]
 }
